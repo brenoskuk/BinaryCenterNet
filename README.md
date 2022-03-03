@@ -48,30 +48,42 @@ Please refer to [INSTALL.md](readme/INSTALL.md) for installation instructions.
 
 ## Design BinaryCenterNet models
 
-For creating and architecture, run     
+You can design your own custom backbone and add it to the architectures folders. 
 
-~~~
-python demo.py ctdet --demo webcam --load_model ../models/ctdet_coco_dla_2x.pth
-~~~
 
 ## Train BinaryCenterNet models
 
 
-For training a given architecture, run:
+To train using an architecture from the architectures folder:     
 
 ~~~
-python demo.py ctdet --demo /path/to/image/or/folder/or/video --load_model ../models/ctdet_coco_dla_2x.pth
+python train.py --architecture <<architecture name>>
 ~~~
+
 
 ## Inference with BinaryCenterNet models
 
 For infering objects using a trained model, run:
 
 ~~~
-python demo.py ctdet --demo /path/to/image/or/folder/or/video --load_model ../models/ctdet_coco_dla_2x.pth
+python inference.py  --image <<path to image>> --load_model <<path to model>>
 ~~~
 
+## Larq resources
+
+This project uses [**Larq**](https://docs.larq.dev/larq/), an Open-Source Library for Training Binarized Neural Networks.
+
+We also make use of the QuickNet architecture. 
+
+> [**Larq: An Open-Source Library for Training Binarized Neural Networks**](http://arxiv.org/abs/1904.07850),            
+> Lukas Geiger and Plumerai Team,        
+> *Journal of Open Source Software ([https://doi.org/10.21105/joss.01746](https://doi.org/10.21105/joss.01746))* 
+
 ## Original CenterNet resources
+
+> [**Objects as Points**](http://arxiv.org/abs/1904.07850),            
+> Xingyi Zhou, Dequan Wang, Philipp Kr&auml;henb&uuml;hl,        
+> *arXiv technical report ([arXiv 1904.07850](http://arxiv.org/abs/1904.07850))* 
 
 - CenterNet + embedding learning based tracking: [FairMOT](https://github.com/ifzhang/FairMOT) from [Yifu Zhang](https://github.com/ifzhang).
 - Detectron2 based implementation: [CenterNet-better](https://github.com/FateScript/CenterNet-better) from [Feng Wang](https://github.com/FateScript).

@@ -1,0 +1,197 @@
+OBSERVATION:
+
+Training: PascalVOC2012 trainval + PascalVOC2007 trainval
+Validation: PascalVOC2007 Test
+
+
+#############################################
+#                                           #
+#            QuickNet MODELS                #
+#                                           #
+#############################################
+
+**QuickNet_CenterNet**
+
+input size: 512x512
+epochs: 200 
+loss: 2.1344
+val  mAP: 0.5503  elapsed eval time: 48.5707
+
++model summary--------------------------------+
+| Total params                      15.5 M    |
+| Trainable params                  15.5 M    |
+| Non-trainable params              14.9 k    |
+| Model size                        12.68 MiB |
+| Model size (8-bit FP weights)     4.29 MiB  |
+| Float-32 Equivalent               59.00 MiB |
+| Compression Ratio of Memory       0.21      |
+| Number of MACs                    16.1 B    |
+| Ratio of MACs that are binarized  0.5996    |
++---------------------------------------------+
+
+
+**BN_QN_CenterNet_Base_fullres**
+
+input size: 512x512
+epochs: 200
+loss: 1.5124 
+val  mAP: 0.5511  elapsed eval time: 47.5718
+
++model_1 summary------------------------------+
+| Total params                      19.3 M    |
+| Trainable params                  19.3 M    |
+| Non-trainable params              20.6 k    |
+| Model size                        8.13 MiB  |
+| Model size (8-bit FP weights)     3.62 MiB  |
+| Float-32 Equivalent               73.52 MiB |
+| Compression Ratio of Memory       0.11      |
+| Number of MACs                    30 B      |
+| Ratio of MACs that are binarized  0.9072    |
++---------------------------------------------+
+
+
+
+
+#############################################
+#                                           #
+#        Binaryzed HOURGLASS MODELS         #
+#                                           #
+#############################################
+
+
+**BN_HG_CenterNet**
+
+input size: 256x256
+epochs: 100 
+
++model summary---------------------------------+
+| Total params                      93.1 M     |
+| Trainable params                  93 M       |
+| Non-trainable params              84 k       |
+| Model size                        185.64 MiB |
+| Model size (8-bit FP weights)     50.51 MiB  |
+| Float-32 Equivalent               355.11 MiB |
+| Compression Ratio of Memory       0.52       |
+| Number of MACs                    27.2 B     |
+| Ratio of MACs that are binarized  0.4279     |
++----------------------------------------------+
+
+
+**Centernet_BN_HG1_003k_v2**
+input size: 256x256
+epochs: 100 
+
+
++model_3 summary------------------------------+
+| Total params                      20.1 M    |
+| Trainable params                  20.1 M    |
+| Non-trainable params              35.4 k    |
+| Model size                        2.58 MiB  |
+| Model size (8-bit FP weights)     2.44 MiB  |
+| Float-32 Equivalent               76.69 MiB |
+| Compression Ratio of Memory       0.03      |
+| Number of MACs                    48.5 B    |
+| Ratio of MACs that are binarized  0.9971    |
++---------------------------------------------+
+
+
+**Centernet_BN_HG1_003k_v2**
+input size: 256x256
+epochs: 100 
+
++model_1 summary-------------------------------+
+| Total params                      5.04 M     |
+| Trainable params                  5.02 M     |
+| Non-trainable params              17.7 k     |
+| Model size                        708.97 KiB |
+| Model size (8-bit FP weights)     636.24 KiB |
+| Float-32 Equivalent               19.22 MiB  |
+| Compression Ratio of Memory       0.04       |
+| Number of MACs                    12.2 B     |
+| Ratio of MACs that are binarized  0.9942     |
++----------------------------------------------+
+
+
+
+#############################################
+#                                           #
+#            Resnet MODELS                  #
+#                                           #
+#############################################
+
+
+**ResNet50_CenterNet_imagenet**
+
+input size: 256x256
+epochs: 100 
+
++model summary------------------------------+
+| Total params                   32.6 M     |
+| Trainable params               32.5 M     |
+| Non-trainable params           54.3 k     |
+| Model size                     124.25 MiB |
+| Model size (8-bit FP weights)  31.06 MiB  |
+| Float-32 Equivalent            124.25 MiB |
+| Compression Ratio of Memory    1.00       |
+| Number of MACs                 8.22 B     |
++-------------------------------------------+
+
+**ResNet50_CenterNet_no_imagenet_fullres**
+
+input size: 512x512
+epochs: 300
+
+loss: 1.0609
+val  mAP: 0.6145
+
++model_3 summary----------------------------+
+| Total params                   32.6 M     |
+| Trainable params               32.5 M     |
+| Non-trainable params           54.3 k     |
+| Model size                     124.25 MiB |
+| Model size (8-bit FP weights)  31.06 MiB  |
+| Float-32 Equivalent            124.25 MiB |
+| Compression Ratio of Memory    1.00       |
+| Number of MACs                 32.9 B     |
++-------------------------------------------+
+
+
+#############################################
+#                                           #
+#            HOURGLASS MODELS               #
+#                                           #
+#############################################
+
+
+**HG_CenterNet**
+
+input size: 256x256
+epochs: 100 
+
++model summary------------------------------+
+| Total params                   93.1 M     |
+| Trainable params               93 M       |
+| Non-trainable params           58.1 k     |
+| Model size                     355.01 MiB |
+| Model size (8-bit FP weights)  88.75 MiB  |
+| Float-32 Equivalent            355.01 MiB |
+| Compression Ratio of Memory    1.00       |
+| Number of MACs                 27.2 B     |
++-------------------------------------------+
+
+HG2_CenterNet
+
+input size: 256x256
+epochs: 100 
+
++model summary------------------------------+
+| Total params                   186 M      |
+| Trainable params               186 M      |
+| Non-trainable params           116 k      |
+| Model size                     710.01 MiB |
+| Model size (8-bit FP weights)  177.50 MiB |
+| Float-32 Equivalent            710.01 MiB |
+| Compression Ratio of Memory    1.00       |
+| Number of MACs                 54.1 B     |
++-------------------------------------------+
+
