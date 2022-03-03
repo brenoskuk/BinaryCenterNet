@@ -51,14 +51,6 @@ def check_args(parsed_args):
     else:
         raise ValueError(
             "Architecture is not available on architectures folder (received: {}) ".format(parsed_args.architecture))
-
-    dataset_path = parsed_args.dataset_path
-    if os.path.exists(dataset_path):
-        # check if pascalvoc exists
-        pass
-    else:
-        raise ValueError(
-            "Dataset folder does not exist(received: {}) ".format(dataset_path))
    
     return parsed_args
 def parse_args(args):
@@ -83,11 +75,7 @@ def parse_args(args):
    
     parser.add_argument('--no-evaluation', help='Disable per epoch evaluation.', dest='evaluation',
                         action='store_false')
-
-    parser.add_argument('--data-augmentation', help='Enable/disable data augmentation.', default=True, type=bool)
-
-    parser.add_argument('--dataset-path', help='Set the dataset path.', default="dataset", type=str)
-
+   
     parser.add_argument('--compute-val-loss', help='Compute validation loss during training', dest='compute_val_loss',
                         action='store_false')
     print(vars(parser.parse_args(args)))
@@ -134,7 +122,8 @@ def main(args=None):
     # Loading Data
     dataset_path = "datasets/PascalVOC/"
     # create random transform objects for augmenting training data
-    if args.data_augmentation:
+    data_augmentation = True
+    if data_augmentation:
         misc_effect = MiscEffect(border_value=0)
         visual_effect = VisualEffect()
     else:
