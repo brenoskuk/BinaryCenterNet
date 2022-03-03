@@ -52,20 +52,19 @@ def check_args(parsed_args):
         raise ValueError(
             "Architecture is not available on architectures folder (received: {}) ".format(parsed_args.architecture))
 
-    dataset_path = parsed_args.dataset_path
-    if os.path.exists(dataset_path):
+    if os.path.exists(parsed_args.dataset_path):
         # check if pascalvoc exists
         pass
     else:
         raise ValueError(
-            "Dataset folder does not exist(received: {}) ".format(dataset_path))
+            "Dataset folder does not exist(received: {}) ".format(parsed_args.dataset_path))
    
     return parsed_args
 def parse_args(args):
     """
     Parse the arguments.
     """
-    parser = argparse.ArgumentParser(description='Training script for training a binary centernet network.')
+    parser = argparse.ArgumentParser(description='Script for training a binary centernet network.')
    
     parser.add_argument('--architecture', help='Architecture that will be used to train the network.', type=str)
    
@@ -81,15 +80,26 @@ def parse_args(args):
    
     parser.add_argument('--no-snapshots', help='Disable saving snapshots.', dest='snapshots', action='store_false')
    
-    parser.add_argument('--no-evaluation', help='Disable per epoch evaluation.', dest='evaluation',
+    parser.add_argument('--epoch-evaluation', help='Disable per epoch evaluation.', dest='epoch-evaluation',
                         action='store_false')
+
+    parser.add_argument('--final-evaluation', help='Disable final model evaluation.', dest='final-evaluation',
+                    action='store_false')
 
     parser.add_argument('--data-augmentation', help='Enable/disable data augmentation.', default=True, type=bool)
 
-    parser.add_argument('--dataset-path', help='Set the dataset path.', default="dataset", type=str)
+    parser.add_argument('--model-summary', help='Disable model summary.', dest='model_summary', action='store_false')
 
-    parser.add_argument('--compute-val-loss', help='Compute validation loss during training', dest='compute_val_loss',
+    parser.add_argument('--dataset-path', help='Set the dataset path.', default=os.path.join('datasets', 'PascalVOC'), type=str)
+
+    parser.add_argument('--compute-val-loss', help='Disable validation loss during training', dest='compute_val_loss',
                         action='store_false')
+
+    parser.add_argument('--val-sampling', help='Set the fraction relative to all data to be sampled at each epoch when calculating the validation mAP during training (1 uses all val set)', type=float, default=0.25)
+
+    parser.add_argument('--train-sampling', help='Set the fraction relative to all data to be sampled at each epoch when calculating the train mAP during training (1 uses all train set)', type=float, default=0.05)
+
+
     print(vars(parser.parse_args(args)))
     return check_args(parser.parse_args(args))
 
@@ -121,18 +131,16 @@ def main(args=None):
    
     # set architecture name
     architecture_name = args.architecture
-    model_name = args.architecture # for convenience
-    model_path = 'saved_models/' + model_name + '_model'
    
     # create model given an architecture
     # (the centernet input must be specified by the architecture file)
     model, prediction_model, debug_model = architecture_module.centernet(input_size = input_size, num_classes = num_classes)
-   
-    lq.models.summary(model)
+    
+    if args.model_summary:
+        lq.models.summary(model)
     
    
     # Loading Data
-    dataset_path = "datasets/PascalVOC/"
     # create random transform objects for augmenting training data
     if args.data_augmentation:
         misc_effect = MiscEffect(border_value=0)
@@ -143,7 +151,7 @@ def main(args=None):
        
     multi_scale = True
     validation_generator = PascalVocGenerator(
-        dataset_path,
+        args.dataset_path,
         # val of PascalVOC is the test of VOC2007
         'val',
         skip_difficult=True,
@@ -152,7 +160,7 @@ def main(args=None):
         batch_size = batch_size
     )
     train_generator = PascalVocGenerator(
-        dataset_path,
+        args.dataset_path,
         # train of PascalVOC is the union of trainval VOC2007 and trainval VOC2012
         'train',
         skip_difficult=True,
@@ -193,31 +201,53 @@ def main(args=None):
             cooldown=0,
             min_lr=1e-7
         )
-    evaluation = Evaluate(validation_generator, prediction_model, model_name = architecture_name,
-                        sample_ratio = 0.25, verbose = 2,
-                        save_best=True, save_thr=0.005,
-                        save_metric = True, val_type = 'val')
-    evaluation_train = Evaluate(train_generator, prediction_model, model_name = architecture_name,
-                                sample_ratio = 0.05, verbose = 2,
-                                save_metric = True, val_type = 'train')
-    save_loss = Save_Loss(model_name = architecture_name)
-    callbacks.append(evaluation)
-    callbacks.append(evaluation_train)
-    callbacks.append(save_loss)
+
+    if args.epoch_evaluation:
+        evaluation = Evaluate(validation_generator, prediction_model, model_name = architecture_name,
+                            sample_ratio = args.val_sampling, verbose = 2,
+                            save_best=True, save_thr=0.005,
+                            save_metric = True, val_type = 'val')
+        evaluation_train = Evaluate(train_generator, prediction_model, model_name = architecture_name,
+                                    sample_ratio = args.train_sampling, verbose = 2,
+                                    save_metric = True, val_type = 'train')
+        save_loss = Save_Loss(model_name = architecture_name)
+        
+        callbacks.append(evaluation)
+        callbacks.append(evaluation_train)
+        callbacks.append(save_loss)
     callbacks.append(lr_reducer)
     callbacks.append(lr_scheduler)
 
     # compile model
     opt = tf.keras.optimizers.Adam(learning_rate=0.001, decay=0, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
     model.compile(optimizer=opt, loss={'centernet_loss': lambda y_true, y_pred: y_pred})
+    
     history = model.fit(
             train_generator,
-            epochs=200,
+            epochs=args.epochs,
             verbose=2,
             callbacks=callbacks
         )
-   
-    print(history.history)
+       
+    if args.final_evaluation:
+
+        print(history.history)
+
+        average_precisions = evaluate(validation_generator, prediction_model,
+                                  flip_test=False,
+                                  keep_resolution=False,
+                                  score_threshold=0.01)
+        # compute per class average precision
+        total_instances = []
+        precisions = []
+        for label, (average_precision, num_annotations) in average_precisions.items():
+            print('{:.0f} instances of class'.format(num_annotations), validation_generator.label_to_name(label),
+                'with average precision: {:.4f}'.format(average_precision))
+            total_instances.append(num_annotations)
+            precisions.append(average_precision)
+        mean_ap = sum(precisions) / sum(x > 0 for x in total_instances)
+        print('mAP: {:.4f}'.format(mean_ap))
+
     return
 
 

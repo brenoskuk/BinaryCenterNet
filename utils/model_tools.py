@@ -27,7 +27,7 @@ from utils.processing_tools import *
 #############################################################
 
 # inference image from a generator
-def image_inference(idx, img_generator, pred_model, num_classes, score_threshold = 0.1, 
+def dataset_img_inference(idx, img_generator, pred_model, num_classes, score_threshold = 0.1, 
                     save_img = False, plot_img = True, figsize = (15,15), infer_time = True):
     
     colors = [np.random.randint(0, 256, 3).tolist() for i in range(num_classes)]
