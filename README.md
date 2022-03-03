@@ -1,6 +1,6 @@
 # BinaryCenterNet
 
-Binary nural networks, Object detection using center point detection:
+Binary neural networks, Object detection using center point detection:
 
 > [**Efficient Object Detection Using Binary Neural Networks**](http://arxiv.org/abs/1904.07850),            
 > Breno Skuk, Dimitris Milioris, Joachim Wabnig         
@@ -33,7 +33,7 @@ We study the impact of increasing the ratio of binarized MAC operations without 
 
 ## Experiments results
 
-### Object Detection on PascalVOC2007 test
+### Object Detection on PascalVOC2007 test set
 
 | Stem | Encoder | Decoder | Heads |  mAP | eq FLOP |
 | -----|---------|---------|-------|------|-----------------|

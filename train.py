@@ -16,16 +16,18 @@ from datetime import date, timedelta
 import time
 from six import raise_from
 import argparse
+
 # import custom modules
-from processing_tools import *
-from generators import *
-from augmentor.misc import MiscEffect
-from augmentor.color import VisualEffect
+from utils.processing_tools import *
+from utils.generators import *
+from utils.augmentor.misc import MiscEffect
+from utils.augmentor.color import VisualEffect
+
 # remove the try in final version
 try:
     import pyximport
     pyximport.install()
-    from evaluate import *
+    from utils.evaluate import *
 except:
     pass
 
