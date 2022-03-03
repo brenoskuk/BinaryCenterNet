@@ -66,7 +66,7 @@ python train.py --architecture <<architecture name>>
 For infering objects using a trained model, run:
 
 ~~~
-python inference.py  --image <<path to image>> --load_model <<path to model>>
+python infer.py  --architecture <<path to architecture>> --model-weights-path <<path to model weights>>
 ~~~
 
 ## Larq resources
