@@ -53,6 +53,11 @@ You can design your own custom backbone and add it to the architectures folders.
 
 ## Train BinaryCenterNet models
 
+### Train using PascalVOC Object detection images and bounding boxes
+
+
+### Train using architectures and PascalVOC
+
 
 To train using an architecture from the architectures folder:     
 
