@@ -90,7 +90,7 @@ def parse_args(args):
 
     parser.add_argument('--model-summary', help='Disable model summary.', dest='model_summary', action='store_false')
 
-    parser.add_argument('--dataset-path', help='Set the dataset path.', default=os.path.join('datasets', 'PascalVOC'), type=str)
+    parser.add_argument('--dataset-path', help='Set the dataset path.', default=os.path.join('datasets', 'PascalVOC-OD-2007-2012'), type=str)
 
     parser.add_argument('--compute-val-loss', help='Disable validation loss during training', dest='compute_val_loss',
                         action='store_false')

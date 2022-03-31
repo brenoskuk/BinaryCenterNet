@@ -52,6 +52,16 @@ conda env create -f requirements.yml
      
 If sucessfull an environment called BinaryCenterNet will be created containing all of the requirements to run the project.
 
+# [Optional] Sanity check with a tiny dataset
+
+If you want to check if the installation is working before downloading the whole PascalVOC dataset you can train and evaluate a toy architecture on a tiny subsample of PascalVOC2007. Run the following command to train a model on only two images.
+
+~~~
+python train.py --architecture custom_qn_centernet --dataset-path PascalVOC-tiny-subset --batch_size 2 --epochs 2 --val-sampling 1 --train-sampling 1 --no-snapshots 
+~~~
+
+A model summary should be printed and the model should train given the arguments. Note that evaluation is performed just to check the pipeline. For more information on training models please refer to README.md
+
 # Downloading PascalVOC dataset 
 
 The train and test set used in the project uses the PascalVOC2007 and the PascalVOC2012 datasets. The merging of these sets has become a standard for evaluation and training of published Object Detection papers.
