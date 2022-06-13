@@ -24,12 +24,12 @@ from utils.augmentor.misc import MiscEffect
 from utils.augmentor.color import VisualEffect
 
 # remove the try in final version
-try:
-    import pyximport
-    pyximport.install()
-    from utils.evaluate import *
-except:
-    pass
+
+import pyximport
+pyximport.install(reload_support=True)
+from utils.evaluate import *
+
+    
 
 def check_args(parsed_args):
     """
@@ -80,10 +80,10 @@ def parse_args(args):
    
     parser.add_argument('--no-snapshots', help='Disable saving snapshots.', dest='snapshots', action='store_false')
    
-    parser.add_argument('--epoch-evaluation', help='Disable per epoch evaluation.', dest='epoch-evaluation',
+    parser.add_argument('--epoch-evaluation', help='Disable per epoch evaluation.', dest='epoch_evaluation',
                         action='store_false')
 
-    parser.add_argument('--final-evaluation', help='Disable final model evaluation.', dest='final-evaluation',
+    parser.add_argument('--final-evaluation', help='Disable final model evaluation.', dest='final_evaluation',
                     action='store_false')
 
     parser.add_argument('--data-augmentation', help='Enable/disable data augmentation.', default=True, type=bool)

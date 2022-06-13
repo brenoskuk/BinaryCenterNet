@@ -12,14 +12,9 @@ from utils.generators import *
 from utils.model_tools import *
 
 
-
-# remove the try in final version
-try:
-    import pyximport
-    pyximport.install()
-    from utils.evaluate import *
-except:
-    pass
+import pyximport
+pyximport.install(reload_support=True)
+from utils.evaluate import *
 
 def check_args(parsed_args):
     """

@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-from compute_overlap import compute_overlap
-from processing_tools import get_affine_transform, affine_transform
+from utils.compute_overlap import compute_overlap
+from utils.processing_tools import get_affine_transform, affine_transform
 
 import time 
 
