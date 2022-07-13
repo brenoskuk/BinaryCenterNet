@@ -52,6 +52,29 @@ voc_classes = {
     'tvmonitor': 19
 }
 
+def add_bbox(image, detections, colors = None, classes = voc_classes):
+
+    if colors is None:
+        colors = [np.random.randint(0, 256, 3).tolist() for i in range(len(classes))]
+    
+    classes_list = list(classes.keys())
+    
+    for detection in detections:
+        xmin = int(round(detection[0]))
+        ymin = int(round(detection[1]))
+        xmax = int(round(detection[2]))
+        ymax = int(round(detection[3]))
+        score = '{:.4f}'.format(detection[4])
+        class_id = int(detection[5])
+        color = colors[class_id]
+        class_name = classes_list[class_id]
+        label = '-'.join([class_name, score])
+        ret, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 1)
+        cv2.rectangle(image, (xmin, ymax - ret[1] - baseline), (xmin + ret[0], ymax), color, -1)
+        cv2.putText(image, label, (xmin, ymax - baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+    return image
+
 #############################################################
 #
 #   Time formatting functions
@@ -215,8 +238,8 @@ def get_frame_time(path_in, time_of_interest, plot_img = False , figsize = (15,1
 #   Object detection on a video 
 #
 #############################################################
-def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta_t = 1, max_it = 5, 
-             plot_img = False , figsize = (15,15), colors = None, verbose = 0):
+def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta_t = 1, max_it = 5,
+             return_images = False, plot_img = False , figsize = (15,15), colors = None, verbose = 0):
     """
     print or save video frames as images using cv2 doing object detection.
     :pred_model: object detection model
@@ -225,12 +248,13 @@ def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta
     :initial_time: Initial time [seconds]
     :delta_t: time diference between frames [seconds]
     :max_it: maximum number of iterations (equals the number of frames analysed)
+    :return_images: set to True to return list containing images of the frames
     :plot_img: set to True to plot image with matplotlib
     :pathOut: pathout for video
     :figsize: set figsize for matplotlib imshow
     :colors: set colors according to classes
     :verbose: disable to silence function prints
-    :return: list of predictions for each frame
+    :return: list of predictions for each frame and list of images (default is an empty list)
     """ 
     
     
@@ -238,7 +262,7 @@ def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta
         colors = [np.random.randint(0, 256, 3).tolist() for i in range(len(classes))]
     
     predictions = []
-    
+    image_list = []
     count = 0
     
     # open video with cv2
@@ -258,30 +282,32 @@ def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta
         print ('Video width: {}, video height = {}'.format(frame_width, frame_height))
         print ('Video length in frames: {}, video fps rate = {} [s^-1], play time = {} [ms]\n'.format(nframes, fps, nframes/fps))
 
-    
-    success,image = vidcap.read()
+    # read and process video frame by frame
+    success, image = vidcap.read()
     success = True
     while success:
         # initial time is set to zero by default
         time = count*delta_t + initial_time
         vidcap.set(cv2.CAP_PROP_POS_MSEC,(time*1000))    # added this line 
-        success,image = vidcap.read()
+        success, image = vidcap.read()
         
         if verbose > 0:
             # calculate frame of the timestamp
             frame_of_interest = int(time*fps)
             print ('Frame Found: frame = {} , time captured = {:.2f} [s]'.format(frame_of_interest, time))
 
-        src_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        
+        # inference on image
         pred = image_direct_inference(image, pred_model, colors, verbose = verbose, plot_img = plot_img, figsize = figsize)
         predictions.append(pred)
+        
+        if return_images:
+            image_list.append(image)
         
         count = count + 1
         if count >= max_it:
             break
         
-    return predictions
+    return predictions, image_list
 
 ########
 
@@ -590,108 +616,24 @@ def generate_video_hm(debug_model, path_in, out_name, out_dim = (1024,576), clas
         out.release()
 
 
-#####################
-# extract a frame
-def get_frame(path_in, get_it = 1, max_it = 1e5, speed = 1, 
-             plot_img = True , figsize = (15,15), verbose = 0):
-    """
-    delete
-    """ 
-    
-    
-    count = 0
-    vidcap = cv2.VideoCapture(path_in)
-    
-    if verbose > 0:
-         # Convert the resolutions from float to integer.
-        frame_width = int(vidcap.get(3))
-        frame_height = int(vidcap.get(4))
-        print ('Video width: {}, video heigth = {}'.format(frame_width, frame_height))
-    
-    success,image = vidcap.read()
-    success = True
 
-    while success:
-        frame_number = count*speed
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(frame_number))    # added this line 
-        success,image = vidcap.read()
-        if verbose > 0:
-            print ('Read a new frame: {}, frame = {} , iteration = {}'.format(success, frame_number, count))
-        
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        
-        if count == get_it:
-            if plot_img:
-                plt.figure(figsize=figsize)
-                plt.imshow(image)
-                plt.axis('off')
-                plt.show()
-            return image
-        
-        count = count + 1
-        if count >= max_it:
-            print('max iterations achieved')
-            break
-        
-    return image
 
-######################
-
-# extract a frame
-def get_frame(path_in, get_it = 1, max_it = 1e5, speed = 1, 
-             plot_img = True , figsize = (15,15), verbose = 0):
-    """
-    delete
-    """ 
-    
-    
-    count = 0
-    vidcap = cv2.VideoCapture(path_in)
-    
-    if verbose > 0:
-         # Convert the resolutions from float to integer.
-        frame_width = int(vidcap.get(3))
-        frame_height = int(vidcap.get(4))
-        print ('Video width: {}, video heigth = {}'.format(frame_width, frame_height))
-    
-    success,image = vidcap.read()
-    success = True
-
-    while success:
-        frame_number = count*speed
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(frame_number))    # added this line 
-        success,image = vidcap.read()
-        if verbose > 0:
-            print ('Read a new frame: {}, frame = {} , iteration = {}'.format(success, frame_number, count))
-        
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        
-        if count == get_it:
-            if plot_img:
-                plt.figure(figsize=figsize)
-                plt.imshow(image)
-                plt.axis('off')
-                plt.show()
-            return image
-        
-        count = count + 1
-        if count >= max_it:
-            print('max iterations achieved')
-            break
-        
-    return image
-
-#####################
+#############################################################
+#
+#   Analyse and filter prediction
+#
+#############################################################
 def analyse_prediction(prediction, classes = voc_classes, display_classes = None, img_dimensions = (512,512), 
-                       ul_lim = None, lr_lim = None, verbose = 0):
+                       conf_thresh = 0.1, ul_lim = None, lr_lim = None, verbose = 0):
     """
      provide an analisys of the image detections and allows to filter a specific class or image crop
     :prediction: prediction of object detection bboxes 
     :classes: dict of classes used by the model to predict
-    :display_classes: classes whose heatmaps will be displayed 
+    :display_classes: classes whose heatmaps will be displayed ([6,14] are respectively car and people)
     :img_dimensions: dimensions of input
     :ul_lim: set a upper left crop corner
     :lr_lim: set a lower right crop corner
+    :conf_thresh: set lower bound on the confidence theshold of prediction
     :verbose: silence prints
     :return: filtered list of predictions 
     """ 
@@ -713,9 +655,13 @@ def analyse_prediction(prediction, classes = voc_classes, display_classes = None
             class_idx = int(p[-1])
             if class_idx in display_classes:
                 instance_class = classes_list[int(p[-1])]
+                # check thesh confidence condition:
+                if p[-2] < conf_thresh:
+                    pass
                 # check crop condition
-                if p[0] >= ul_lim[0] and p[1] >= ul_lim[0] and p[2] <= lr_lim[0] and p[3] <= lr_lim[1]:
+                elif p[0] >= ul_lim[0] and p[1] >= ul_lim[0] and p[2] <= lr_lim[0] and p[3] <= lr_lim[1]:
                     class_count[instance_class] += 1
+                    # print if verbose
                     if verbose >= 2:
                         print('****\nObject:{}\nConfidence {} '.format(instance_class, p[-2]))
                         print('Upper left: ({} {})'.format(p[0],p[1]))

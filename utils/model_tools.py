@@ -228,7 +228,7 @@ def image_direct_inference(image, pred_model, colors, score_threshold = 0.1,
         plt.show()
     
     if save_img:
-        cv2.imwrite(os.path.join('output',output_name), src_image)
+        cv2.imwrite(os.path.join('output', output_name), src_image)
         
     return detections
 
