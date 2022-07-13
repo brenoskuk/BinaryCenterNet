@@ -6,10 +6,11 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv2
-import json
 import time
-import glob
-import sys
+
+import datetime
+
+
 
 ######################
 # import custom modules
@@ -22,10 +23,9 @@ import pyximport
 pyximport.install(reload_support=True)
 from utils.evaluate import *
 
-import infer
 #############################################################
 #
-#    Image inference function
+#    PascaolVOC classes
 #
 #############################################################
 
@@ -52,205 +52,114 @@ voc_classes = {
     'tvmonitor': 19
 }
 
-def preprocess_image(image, c, s, tgt_w, tgt_h):
-        trans_input = get_affine_transform(c, s, (tgt_w, tgt_h))
-        image = cv2.warpAffine(image, trans_input, (tgt_w, tgt_h), flags=cv2.INTER_LINEAR)
-        image = image.astype(np.float32)
+#############################################################
+#
+#   Time formatting functions
+#
+#############################################################
 
-        image[..., 0] -= 103.939
-        image[..., 1] -= 116.779
-        image[..., 2] -= 123.68
+def string2seconds(time_string):
+    return sum(float(x) * 60 ** i for i, x in enumerate(reversed(time_string.split(':'))))
 
-        return image
+#############################################################
+#
+#   Obtain the list of mp4 files inside a given folder
+#
+#############################################################
 
-# inference directly from an image stored in RAM
-def image_direct_inference(image, pred_model, colors, score_threshold = 0.1, 
-                           output_name = 'image_output',
-                    save_img = False, plot_img = False, figsize = (15,15), verbose = 0,
-                    classes = voc_classes, input_w = 512, input_h = 512):
-    """
-    Extract object detection predictions from a model.
-
-    :image: image file
-    :pred_model: model used for predicting bounding boxes
-    :colors: colors to use in plot
-    :score_threshold: minimum confidence to accept detection
-    :plot_img: set to True to plot image with matplotlib
-    :output_name: set output image name
-    :save_img: set to true to save image with detections to /output
-    :figsize: set size for plot if plot_img is True
-    :classes: dictionary with classes used by the detector
-    :input_w: input width
-    :input_h: input lehgth
-    :verbose: disable to silence function prints
+def get_mp4_filepaths(folder_path, verbose = 0):
+    # get files and folders inside folder
+    filenames = []
+    dirnames = []
+    for (_dirpath, _dirnames, _filenames) in os.walk(folder_path):
+        filenames.extend(_filenames)
+        dirnames.extend(_dirnames)
+        break
     
-    :return: array of detections
-    """ 
-    
-    tgt_w=input_w
-    tgt_h=input_h
-    
-
-    classes_list = list(classes.keys())
-    
-    # create directory if it doesn't exist
-    if save_img:
-        if not os.path.isdir('output'):
-            os.mkdir('output')
-    
-    # copy image
-    src_image = image.copy()
-    
-    # get center and scale of the image
-    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
-    s = max(image.shape[0], image.shape[1]) * 1.0
-
-    # preprocess image
-    image = preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
-    inputs = np.expand_dims(image, axis=0)
-    
-    # run network
-    start = time.time()
-    detections = pred_model.predict_on_batch(inputs)[0]
-    delta_t = time.time() - start
-    
+    # display files inside folder and filter mp4 files
+    indexes_mp4 = []
     if verbose > 0:
-        print('Inference time : ', delta_t)
+        print('Found a total of {} files: \n'.format(len(filenames)))
+    for idx, name in enumerate(filenames):
+        if os.path.splitext(name)[1] == '.mp4':
+            indexes_mp4.append(idx)
+        if verbose > 0:
+            print('file idx:  {}\nfile name: {}\n'.format(idx, name))
+
+    # display folders inside folder if any
+    for idx, name in enumerate(dirnames):
+        print('folder name {}: {}'.format(idx, name))
     
-    # get scores
-    scores = detections[:, 4]
-
-    # select indices which have a score above the threshold
-    indices = np.where(scores > score_threshold)[0]
-
-    # select those detections
-    detections = detections[indices]
-    detections_copy = detections.copy()
-    detections = detections.astype(np.float64)
+    print('Found {} .mp4 files: \n'.format(len(indexes_mp4)))
+    # display mp4 folders
     
-    # obtain detection transformation to original image size
-    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
-
-    for j in range(detections.shape[0]):
-        detections[j, 0:2] = affine_transform(detections[j, 0:2], trans)
-        detections[j, 2:4] = affine_transform(detections[j, 2:4], trans)
-
-    detections[:, [0, 2]] = np.clip(detections[:, [0, 2]], 0, src_image.shape[1])
-    detections[:, [1, 3]] = np.clip(detections[:, [1, 3]], 0, src_image.shape[0])
     
-    if plot_img:
-        for detection in detections:
-            xmin = int(round(detection[0]))
-            ymin = int(round(detection[1]))
-            xmax = int(round(detection[2]))
-            ymax = int(round(detection[3]))
-            score = '{:.4f}'.format(detection[4])
-            class_id = int(detection[5])
-            color = colors[class_id]
-            class_name = classes_list[class_id]
-            label = '-'.join([class_name, score])
-            ret, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-            cv2.rectangle(src_image, (xmin, ymin), (xmax, ymax), color, 1)
-            cv2.rectangle(src_image, (xmin, ymax - ret[1] - baseline), (xmin + ret[0], ymax), color, -1)
-            cv2.putText(src_image, label, (xmin, ymax - baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-        src_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2RGB)
-        plt.figure(figsize=figsize)
-        plt.imshow(src_image)
-        plt.axis('off')
-        plt.show()
-    
-    if save_img:
-        cv2.imwrite(os.path.join('output',output_name), src_image)
-        
-    return detections
+    list_mp4_files = []
+    list_mp4_names = []
+    for idx, mp4_idx in enumerate(indexes_mp4):
+        print('file idx:  {}\nfile name: {}\n'.format(idx, filenames[mp4_idx]))
+        list_mp4_files.append(os.path.join(folder_path, filenames[idx]))
+        list_mp4_names.append(filenames[idx])
 
-######################
+    return list_mp4_files, list_mp4_names
 
-# inference image
-def img_inference(image, pred_model, num_classes, score_threshold = 0.1, 
-                    save_img = False, plot_img = True, figsize = (15,15), infer_time = True):
-    
-    colors = [np.random.randint(0, 256, 3).tolist() for i in range(num_classes)]
+#############################################################
+#
+#   Check integrity of mp4 files 
+#
+#############################################################
 
-    classes = list(img_generator.classes.keys())
-    # create directory if it doesn't exist
-    if save_img:
-        if not os.path.isdir('tests'):
-            os.mkdir('tests')
+def check_mp4_list(list_mp4_files, list_mp4_names, display_frame = False, figsize = (5,5)):
+    for filepath, filename in zip(list_mp4_files, list_mp4_names):
+        try:
+            # check if video can be opened with opencv 
+            vidcap = cv2.VideoCapture(filepath)
+
+            fps = vidcap.get(cv2.CAP_PROP_FPS)
+            nframes = vidcap.get(cv2.CAP_PROP_FRAME_COUNT);
+            nseconds = float(nframes) / float(fps) # duration is obtained in seconds
+
+            # Convert the resolutions from float to integer.
+            frame_width = int(vidcap.get(3))
+            frame_height = int(vidcap.get(4))
+
+            print('Selected file name:  {}'.format(filename))
+            print ('Video width: {}, video height = {}'.format(frame_width, frame_height))
+            print ('Video length in frames: {}, video fps rate = {} [s^-1], play time = {} [ms]'.format(nframes, fps, nframes/fps))
+            print('Video duration [h:mm:ss] : {}'.format(str(datetime.timedelta(seconds=nseconds))))
+
+            # try reading first frame
+            success, image = vidcap.read()
             
-    # preprocess image     
-    src_image = image.copy()
-    
-    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
-    s = max(image.shape[0], image.shape[1]) * 1.0
+            if success:
+                # display first frame
+                if display_frame:
+                    print('First frame: ')
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)    
+                    plt.figure(figsize=figsize)
+                    plt.imshow(image)
+                    plt.axis('on')
+                    plt.show()
+                print('Success checking integrity...')
 
-    tgt_w = img_generator.input_size
-    tgt_h = img_generator.input_size
-    image = img_generator.preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
+            else:
+                print('Problem reading video...')
+        except:
+            print('Problem reading video...')
+        print('\n')
 
-    inputs = np.expand_dims(image, axis=0)
-    
-    # run network
-    start = time.time()
-    detections = pred_model.predict_on_batch(inputs)[0]
-    delta_t = time.time() - start
-    
-    if infer_time:
-        print('Inference time : ', delta_t)
-    
-    # get scores
-    scores = detections[:, 4]
+#############################################################
+#
+#   Extract a frame at given time from mp4 file (encoding dependent)
+#
+#############################################################
 
-
-    # select indices which have a score above the threshold
-    indices = np.where(scores > score_threshold)[0]
-
-    # select those detections
-    detections = detections[indices]
-    detections_copy = detections.copy()
-    detections = detections.astype(np.float64)
-    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
-
-    for j in range(detections.shape[0]):
-        detections[j, 0:2] = affine_transform(detections[j, 0:2], trans)
-        detections[j, 2:4] = affine_transform(detections[j, 2:4], trans)
-
-    detections[:, [0, 2]] = np.clip(detections[:, [0, 2]], 0, src_image.shape[1])
-    detections[:, [1, 3]] = np.clip(detections[:, [1, 3]], 0, src_image.shape[0])
-    for detection in detections:
-        xmin = int(round(detection[0]))
-        ymin = int(round(detection[1]))
-        xmax = int(round(detection[2]))
-        ymax = int(round(detection[3]))
-        score = '{:.4f}'.format(detection[4])
-        class_id = int(detection[5])
-        color = colors[class_id]
-        class_name = classes[class_id]
-        label = '-'.join([class_name, score])
-        ret, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(src_image, (xmin, ymin), (xmax, ymax), color, 1)
-        cv2.rectangle(src_image, (xmin, ymax - ret[1] - baseline), (xmin + ret[0], ymax), color, -1)
-        cv2.putText(src_image, label, (xmin, ymax - baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-    
-    if save_img:
-        image_fname = img_generator.image_names[idx]
-        cv2.imwrite('tests/{}.jpg'.format(image_fname), src_image)
-    if plot_img:
-        src_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2RGB)
-        plt.figure(figsize=figsize)
-        plt.imshow(src_image)
-        plt.axis('off')
-        plt.show()
-
-######################
-
-# extract a frame at given time from mp4 file (encoding can be a problem)
 def get_frame_time(path_in, time_of_interest, plot_img = False , figsize = (15,15), verbose = 0):
     """
     get video frame at specific time as an image using cv2.
 
     :path_in: video file path
-    :time_of_interest: select time of inference
+    :time_of_interest: select time of inference [seconds]
     :plot_img: set to True to plot image with matplotlib
     :figsize: set figsize for matplotlib imshow
     :verbose: disable to silence function prints
@@ -274,22 +183,20 @@ def get_frame_time(path_in, time_of_interest, plot_img = False , figsize = (15,1
         print ('Video length in frames: {}, video fps rate = {} [s^-1], play time = {} [ms]'.format(nframes, fps, nframes/fps))
 
     success,image = vidcap.read()
-    success = True
     
     frame_found = False
     image = None
     
     # calculate frame of the timestamp
-    dt = 1/fps
-    frame_of_interest = int(time_of_interest/dt)
-    print(dt)
+    frame_of_interest = int(time_of_interest*fps)
+    
     # read video file
-    vidcap.set(cv2.CAP_PROP_POS_MSEC,(frame_of_interest))    # added this line 
+    vidcap.set(cv2.CAP_PROP_POS_MSEC,(1000*time_of_interest)) # adjust for miliseconds 
     success,image = vidcap.read()
     if success:         
         if verbose > 0:
-            print ('Frame Found: frame = {} , time captured = {:.2f} [ms]'.format(frame_of_interest, frame_of_interest*dt))
-        # assume succcess
+            print ('Frame Found: frame = {} , time captured = {:.2f} [s]'.format(frame_of_interest, time_of_interest))
+
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         if plot_img:
             plt.figure(figsize=figsize)
@@ -301,57 +208,25 @@ def get_frame_time(path_in, time_of_interest, plot_img = False , figsize = (15,1
         return None
         
 
-#######
 
-# extract between different frames blocks
-def print_frames(path_in, max_it = 5, speed = 1, plot_img = True , figsize = (15,15), verbose = True):
-    """
-    print or save video frames as images using cv2.
 
-    :path_in: video file path
-    :max_it: describe about parameter p3
-    :plot_img: set to True to plot image with matplotlib
-    :speed: set speed for reading frames (eg.: speed = 10 reads an image for each 10 frames)
-    :pathOut: describe about parameter p2
-    :figsize: set figsize for matplotlib imshow
-    :verbose: disable to silence function prints
-    """ 
-    count = 0
-    vidcap = cv2.VideoCapture(path_in)
-    success,image = vidcap.read()
-    success = True
-    while success:
-        frame_number = count*speed
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(frame_number))    # added this line 
-        success,image = vidcap.read()
-        if verbose:
-            print ('Read a new frame: {}, frame = {} , iteration = {}'.format(success, frame_number, count))
-        
-        src_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        if plot_img:
-            plt.figure(figsize=figsize)
-            plt.imshow(src_image)
-            plt.axis('off')
-            plt.show()
-        
-        count = count + 1
-        if count >= max_it:
-            break
-
-################
-
-# OD on different frames blocks
-def video_od(pred_model, path_in, classes = voc_classes, max_it = 5, speed = 1, 
+#############################################################
+#
+#   Object detection on a video 
+#
+#############################################################
+def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta_t = 1, max_it = 5, 
              plot_img = False , figsize = (15,15), colors = None, verbose = 0):
     """
-    print or save video frames as images using cv2.
+    print or save video frames as images using cv2 doing object detection.
     :pred_model: object detection model
-    :path_in: video file path
-    :classes: dict of classes used by the model to predict
-    :max_it: describe about parameter p3
+    :path_in: video file path to mp4 file
+    :classes: dict of classes used by the model to predict\
+    :initial_time: Initial time [seconds]
+    :delta_t: time diference between frames [seconds]
+    :max_it: maximum number of iterations (equals the number of frames analysed)
     :plot_img: set to True to plot image with matplotlib
-    :speed: set speed for reading frames (eg.: speed = 10 reads an image for each 10 frames)
-    :pathOut: describe about parameter p2
+    :pathOut: pathout for video
     :figsize: set figsize for matplotlib imshow
     :colors: set colors according to classes
     :verbose: disable to silence function prints
@@ -364,30 +239,44 @@ def video_od(pred_model, path_in, classes = voc_classes, max_it = 5, speed = 1,
     
     predictions = []
     
-
-    
     count = 0
+    
+    # open video with cv2
     vidcap = cv2.VideoCapture(path_in)
     
+    # Convert the resolutions from float to integer.
+    frame_width = int(vidcap.get(3))
+    frame_height = int(vidcap.get(4))
+    
+    # Get number of frames
+    nframes = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    # Get fps rate
+    fps = vidcap.get(cv2.CAP_PROP_FPS)
+
     if verbose > 0:
-         # Convert the resolutions from float to integer.
-        frame_width = int(vidcap.get(3))
-        frame_height = int(vidcap.get(4))
-        print ('Video width: {}, video heigth = {}'.format(frame_width, frame_height))
+        print ('Video width: {}, video height = {}'.format(frame_width, frame_height))
+        print ('Video length in frames: {}, video fps rate = {} [s^-1], play time = {} [ms]\n'.format(nframes, fps, nframes/fps))
+
     
     success,image = vidcap.read()
     success = True
     while success:
-        frame_number = count*speed
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(frame_number))    # added this line 
+        # initial time is set to zero by default
+        time = count*delta_t + initial_time
+        vidcap.set(cv2.CAP_PROP_POS_MSEC,(time*1000))    # added this line 
         success,image = vidcap.read()
-        if verbose > 0:
-            print ('Read a new frame: {}, frame = {} , iteration = {}'.format(success, frame_number, count))
         
+        if verbose > 0:
+            # calculate frame of the timestamp
+            frame_of_interest = int(time*fps)
+            print ('Frame Found: frame = {} , time captured = {:.2f} [s]'.format(frame_of_interest, time))
+
         src_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
         pred = image_direct_inference(image, pred_model, colors, verbose = verbose, plot_img = plot_img, figsize = figsize)
         predictions.append(pred)
+        
         count = count + 1
         if count >= max_it:
             break

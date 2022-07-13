@@ -15,7 +15,16 @@ import warnings
 # Pre processing Utils
 #######
 
+def preprocess_image(image, c, s, tgt_w, tgt_h):
+        trans_input = get_affine_transform(c, s, (tgt_w, tgt_h))
+        image = cv2.warpAffine(image, trans_input, (tgt_w, tgt_h), flags=cv2.INTER_LINEAR)
+        image = image.astype(np.float32)
 
+        image[..., 0] -= 103.939
+        image[..., 1] -= 116.779
+        image[..., 2] -= 123.68
+
+        return image
 
 def get_affine_transform(center,
                          scale,
