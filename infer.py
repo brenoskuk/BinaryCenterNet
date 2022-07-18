@@ -129,7 +129,6 @@ def main(args=None):
     initial_img  = 100
     for i in range(40):
         dataset_img_inference(initial_img + i, validation_generator, prediction_model, score_threshold = 0.01, num_classes = 20, figsize=(8,8))
-
     return
 
 if __name__ == '__main__':

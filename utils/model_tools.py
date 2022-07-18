@@ -18,15 +18,36 @@ from utils.processing_tools import *
 
 
 
-            
+voc_classes = {
+    'aeroplane': 0,
+    'bicycle': 1,
+    'bird': 2,
+    'boat': 3,
+    'bottle': 4,
+    'bus': 5,
+    'car': 6,
+    'cat': 7,
+    'chair': 8,
+    'cow': 9,
+    'diningtable': 10,
+    'dog': 11,
+    'horse': 12,
+    'motorbike': 13,
+    'person': 14,
+    'pottedplant': 15,
+    'sheep': 16,
+    'sofa': 17,
+    'train': 18,
+    'tvmonitor': 19
+}           
             
 #############################################################
 #
-#    Inference function
+#    Inference function from a generator
 #
 #############################################################
 
-# inference image from a generator
+
 def dataset_img_inference(idx, img_generator, pred_model, num_classes, score_threshold = 0.1, 
                     save_img = False, plot_img = True, figsize = (15,15), infer_time = True):
     
@@ -104,7 +125,113 @@ def dataset_img_inference(idx, img_generator, pred_model, num_classes, score_thr
         plt.axis('off')
         plt.show()
         
+
+
+#############################################################
+#
+#   Inference directly from an image stored as a numpy array
+#
+#############################################################
+def image_direct_inference(image, pred_model, colors, score_threshold = 0.1, 
+                           output_name = 'image_output',
+                    save_img = False, plot_img = False, figsize = (15,15), verbose = 0,
+                    classes = voc_classes, input_w = 512, input_h = 512):
+    """
+    Extract object detection predictions from a model.
+
+    :image: image file
+    :pred_model: model used for predicting bounding boxes
+    :colors: colors to use in plot
+    :score_threshold: minimum confidence to accept detection
+    :plot_img: set to True to plot image with matplotlib
+    :output_name: set output image name
+    :save_img: set to true to save image with detections to /output
+    :figsize: set size for plot if plot_img is True
+    :classes: dictionary with classes used by the detector
+    :input_w: input width
+    :input_h: input lehgth
+    :verbose: disable to silence function prints
+    
+    :return: array of detections
+    """ 
+    
+    tgt_w=input_w
+    tgt_h=input_h
+    
+
+    classes_list = list(classes.keys())
+    
+    # create directory if it doesn't exist
+    if save_img:
+        if not os.path.isdir('output'):
+            os.mkdir('output')
+    
+    # copy image
+    src_image = image.copy()
+    
+    # get center and scale of the image
+    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
+    s = max(image.shape[0], image.shape[1]) * 1.0
+
+    # preprocess image
+    image = preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
+    inputs = np.expand_dims(image, axis=0)
+    
+    # run network
+    start = time.time()
+    detections = pred_model.predict_on_batch(inputs)[0]
+    delta_t = time.time() - start
+    
+    if verbose > 0:
+        print('Inference time : ', delta_t)
+    
+    # get scores
+    scores = detections[:, 4]
+
+    # select indices which have a score above the threshold
+    indices = np.where(scores > score_threshold)[0]
+
+    # select those detections
+    detections = detections[indices]
+    detections_copy = detections.copy()
+    detections = detections.astype(np.float64)
+    
+    # obtain detection transformation to original image size
+    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
+
+    for j in range(detections.shape[0]):
+        detections[j, 0:2] = affine_transform(detections[j, 0:2], trans)
+        detections[j, 2:4] = affine_transform(detections[j, 2:4], trans)
+
+    detections[:, [0, 2]] = np.clip(detections[:, [0, 2]], 0, src_image.shape[1])
+    detections[:, [1, 3]] = np.clip(detections[:, [1, 3]], 0, src_image.shape[0])
+    
+    if plot_img:
+        for detection in detections:
+            xmin = int(round(detection[0]))
+            ymin = int(round(detection[1]))
+            xmax = int(round(detection[2]))
+            ymax = int(round(detection[3]))
+            score = '{:.4f}'.format(detection[4])
+            class_id = int(detection[5])
+            color = colors[class_id]
+            class_name = classes_list[class_id]
+            label = '-'.join([class_name, score])
+            ret, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            cv2.rectangle(src_image, (xmin, ymin), (xmax, ymax), color, 1)
+            cv2.rectangle(src_image, (xmin, ymax - ret[1] - baseline), (xmin + ret[0], ymax), color, -1)
+            cv2.putText(src_image, label, (xmin, ymax - baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        src_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2RGB)
+        plt.figure(figsize=figsize)
+        plt.imshow(src_image)
+        plt.axis('off')
+        plt.show()
+    
+    if save_img:
+        cv2.imwrite(os.path.join('output', output_name), src_image)
         
+    return detections
+
 #############################################################
 #
 #    Saving and Loading models
@@ -147,4 +274,75 @@ def load_model(architecture_name):
         print("Problem loading model...")
     return model, prediction_model, debug_model
 
+#############################################################
+#
+#   Heatmap direct inference
+#
+#############################################################
+def hmap_direct_inference(image, debug_model, score_threshold = 0.1,
+                           output_name = 'heatmap_output',
+                    save_img = False, plot_img = False, figsize = (15,15), verbose = 0,
+                    classes = voc_classes, input_w = 512, input_h = 512):
+    """
+    Extract object detection heatmap predictions from a model.
 
+    :image: image file
+    :pred_model: model used for predicting bounding boxes
+    :colors: colors to use in plot
+    :score_threshold: minimum confidence to accept detection
+    :plot_img: set to True to plot image with matplotlib
+    :output_name: set output image name
+    :save_img: set to true to save image with detections to /output
+    :figsize: set size for plot if plot_img is True
+    :classes: dictionary with classes used by the detector
+    :input_w: input width
+    :input_h: input lehgth
+    :verbose: disable to silence function prints
+    
+    :return: array of heatmaps
+    """ 
+    
+    tgt_w=input_w
+    tgt_h=input_h
+    
+
+    classes_list = list(classes.keys())
+    
+    # create directory if it doesn't exist
+    if save_img:
+        if not os.path.isdir('output'):
+            os.mkdir('output')
+    
+    # copy image
+    src_image = image.copy()
+    
+    # get center and scale of the image
+    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
+    s = max(image.shape[0], image.shape[1]) * 1.0
+
+    # preprocess image
+    image = preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
+    inputs = np.expand_dims(image, axis=0)
+    
+    # run network
+    start = time.time()
+    heatmaps = heatmaps = debug_model.predict_on_batch(inputs)[0][0]
+    delta_t = time.time() - start
+    
+    if verbose > 0:
+        print('Inference time : ', delta_t)
+    
+    
+    # obtain detection transformation to original image size
+    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
+
+    
+    if plot_img:
+        plt.figure(figsize=figsize)
+        for idx in range(0,20):
+            plt.subplot(4, 5, idx+1)
+            plt.imshow(heatmaps[:,:,idx])
+            title = 'class: ' + classes_list[idx]
+            plt.title(title)
+        
+    return heatmaps
