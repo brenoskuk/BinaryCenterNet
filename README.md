@@ -103,6 +103,8 @@ Here is a list of the arguments that can be given to train.py:
 
 For infering objects using a trained model, run:
 
+
+**New feature:** Current version supports inference on .mp4 files. Functions can be found at utils/video_utils.py 
 ~~~
 python infer.py  --architecture <<path to architecture>> --model-weights-path <<path to model weights>>
 ~~~
