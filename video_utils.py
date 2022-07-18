@@ -10,10 +10,8 @@ import time
 
 import datetime
 
-
-
-######################
 # import custom modules
+
 from utils.processing_tools import *
 from utils.generators import *
 from utils.model_tools import *
@@ -309,186 +307,15 @@ def video_od(pred_model, path_in, classes = voc_classes, initial_time = 0, delta
         
     return predictions, image_list
 
-########
-
-# OD on different frames blocks outputing video
-def generate_video_od(pred_model, path_in, out_name, out_dim = (1024,576), classes = voc_classes, max_frames = 1e4, speed = 1, 
-             plot_img = False , figsize = (15,15), colors = None, verbose = 0):
-    """
-    print or save video frames as images using cv2.
-    :pred_model: object detection model
-    :path_in: video file path
-    :out_name: name of the output video file
-    :out_dim: output dimension of the video (std = 1024,576)
-    :classes: dict of classes used by the model to predict
-    :max_it: describe about parameter p3
-    :plot_img: set to True to plot image with matplotlib
-    :speed: set speed for reading frames (eg.: speed = 10 reads an image for each 10 frames)
-    :pathOut: describe about parameter p2
-    :figsize: set figsize for matplotlib imshow
-    :colors: set colors according to classes
-    :verbose: disable to silence function prints
-    :return: list of predictions for each frame
-    """ 
-    
-    if colors is None:
-        colors = [np.random.randint(0, 256, 3).tolist() for i in range(num_classes)]
-    
-    predictions = []
-    
-    # Get class names in string format
-    classes = list(classes.keys())
-    
-    # create directory if it doesn't exist
-    if not os.path.isdir('output'):
-        os.mkdir('output')
-    
-    # Open and process video using cv2
-    vidcap = cv2.VideoCapture(path_in)
-    success,image = vidcap.read()
-    success = True
-    
-    # Convert the resolutions from float to integer.
-    frame_width = int(vidcap.get(3))
-    frame_height = int(vidcap.get(4))
-
-    property_id = int(cv2.CAP_PROP_FRAME_COUNT) 
-    video_fps = vidcap.get(cv2.CAP_PROP_FPS)
-
-    # Process subset or whole video
-    nframes = int(cv2.VideoCapture.get(vidcap, property_id))
-    nprocess = min(nframes, max_frames)
-    
-    # Define the codec and create VideoWriter object
-    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    
-    # Select output format
-    out = cv2.VideoWriter(os.path.join('output', out_name + '.mp4'), fourcc, video_fps, out_dim)
-    
-    
-    if verbose >= 1:
-        print("Video original framerate is {}".format(video_fps))
-        print("Video length consists of {} frames\n".format(nframes))
-        if nprocess != nframes:
-            print("Processing  {} frames\n\n".format(nprocess))
-        
-    
-    count = 0
-    while success and count < nprocess:
-        
-        frame_number = count*speed
-        vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-        success,image = vidcap.read()
-        
-        if not success:
-            break
-            
-        detections = image_direct_inference(image, pred_model, colors, plot_img = False, verbose = 0)
-
-        #add bbox to frames
-        for detection in detections:
-            xmin = int(round(detection[0]))
-            ymin = int(round(detection[1]))
-            xmax = int(round(detection[2]))
-            ymax = int(round(detection[3]))
-            score = '{:.4f}'.format(detection[4])
-            class_id = int(detection[5])
-            color = colors[class_id]
-            class_name = classes[class_id]
-            label = '-'.join([class_name, score])
-            ret, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-            cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 1)
-            cv2.rectangle(image, (xmin, ymax - ret[1] - baseline), (xmin + ret[0], ymax), color, -1)
-            cv2.putText(image, label, (xmin, ymax - baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-        
-        
-        # write the OD frame
-        out.write(cv2.resize(image, out_dim, interpolation = cv2.INTER_AREA))
-        
-        count = count + 1
-        if verbose >= 2:
-            pct = (count/nprocess)*100
-            if pct%10 == 0:
-                print("Processed {}% of frames".format(pct))
-
-    # When everything done, release the video capture and video write objects
-    vidcap.release()
-    out.release()
-    
-############
-
-# inference directly from an image stored in RAM and optionally output hmaps
-def hmap_direct_inference(image, debug_model, score_threshold = 0.1,
-                           output_name = 'heatmap_output',
-                    save_img = False, plot_img = False, figsize = (15,15), verbose = 0,
-                    classes = voc_classes, input_w = 512, input_h = 512):
-    """
-    Extract object detection heatmap predictions from a model.
-
-    :image: image file
-    :pred_model: model used for predicting bounding boxes
-    :colors: colors to use in plot
-    :score_threshold: minimum confidence to accept detection
-    :plot_img: set to True to plot image with matplotlib
-    :output_name: set output image name
-    :save_img: set to true to save image with detections to /output
-    :figsize: set size for plot if plot_img is True
-    :classes: dictionary with classes used by the detector
-    :input_w: input width
-    :input_h: input lehgth
-    :verbose: disable to silence function prints
-    
-    :return: array of heatmaps
-    """ 
-    
-    tgt_w=input_w
-    tgt_h=input_h
-    
-
-    classes_list = list(classes.keys())
-    
-    # create directory if it doesn't exist
-    if save_img:
-        if not os.path.isdir('output'):
-            os.mkdir('output')
-    
-    # copy image
-    src_image = image.copy()
-    
-    # get center and scale of the image
-    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
-    s = max(image.shape[0], image.shape[1]) * 1.0
-
-    # preprocess image
-    image = preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
-    inputs = np.expand_dims(image, axis=0)
-    
-    # run network
-    start = time.time()
-    heatmaps = heatmaps = debug_model.predict_on_batch(inputs)[0][0]
-    delta_t = time.time() - start
-    
-    if verbose > 0:
-        print('Inference time : ', delta_t)
-    
-    
-    # obtain detection transformation to original image size
-    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
 
     
-    if plot_img:
-        plt.figure(figsize=figsize)
-        for idx in range(0,20):
-            plt.subplot(4, 5, idx+1)
-            plt.imshow(heatmaps[:,:,idx])
-            title = 'class: ' + classes_list[idx]
-            plt.title(title)
-        
-    return heatmaps
 
-#######
 
-# for the moment extracts 1 fps
+#############################################################
+#
+#   Video heatmap inference
+#
+#############################################################
 def video_hmaps(pred_model, num_classes, pathIn, classes_displayed = [6], pathOut = None, max_it = 5, figsize = (15,15), verbose = True):
     if pathOut is None:
         count = 0
@@ -508,9 +335,11 @@ def video_hmaps(pred_model, num_classes, pathIn, classes_displayed = [6], pathOu
             if count == max_it:
                 break
 
-######
-
-# OD on different frames blocks outputing video
+#############################################################
+#
+#   Generate video from heatmap inference
+#
+#############################################################
 def generate_video_hm(debug_model, path_in, out_name, out_dim = (1024,576), classes = voc_classes, display_classes = [6],
                       max_frames = 1e4, speed = 1, plot_img = False , figsize = (15,15), colors = None, verbose = 0):
     """
@@ -679,130 +508,3 @@ def analyse_prediction(prediction, classes = voc_classes, display_classes = None
     
     return filtered_predictions
 
-######################
-#POSITION EST FUNCS
-
-def calculate_error(estimated_pos, gt_pos):
-    return np.linalg.norm(np.array(estimated_pos) - np.array(gt_pos))/np.linalg.norm(np.array(gt_pos))*100
-
-def plot_result_position(idx, imgs, anno, positions):
-    img = imgs[idx]
-    car_img_coords_a = get_bb_center(anno[idx]['bboxes'][0])
-    car_img_coords_b = get_bb_center(anno[idx]['bboxes'][1])
-
-    car_xy_coords_a = positions[idx][0]
-    car_xy_coords_b = positions[idx][1]
-
-    pos_car_a = get_vehicle_pos(car_img_coords_a)
-    pos_car_b = get_vehicle_pos(car_img_coords_b)
-
-    plot_2_cars_center(img, car_img_coords_a, car_img_coords_b)
-
-    estimated_a_coords = np.array([camera_coords[0] + pos_car_a[0], camera_coords[1] -pos_car_a[1]])
-    estimated_b_coords = np.array([camera_coords[0] + pos_car_b[0], camera_coords[1] -pos_car_b[1]])
-
-    pos_a_error = calculate_error(estimated_a_coords, car_xy_coords_a)
-    pos_b_error = calculate_error(estimated_b_coords, car_xy_coords_b)
-
-
-    print("Red dot: ")
-    print("XY car coordinates relative to camera: ", (pos_car_a[0],pos_car_a[1]))
-    print("Estimated world car coordinates: ", estimated_a_coords)
-    print("Real coordinates: ", car_xy_coords_a)
-    print("Error : {} %".format(pos_a_error))
-
-    print("\n")
-
-    print("Yellow dot: ")
-    print("XY car coordinates relative to camera: ", (pos_car_b[0],pos_car_b[1]))
-    print("Estimated world car coordinates: ", estimated_b_coords)
-    print("Real coordinates: ", car_xy_coords_b)
-    print("Error : {} %".format(pos_b_error))
-
-    print("\n")
-
-    print("Relative car distance: ", np.linalg.norm(estimated_a_coords - estimated_b_coords), ' [m]')
-
-def get_bb_center(bb):
-    """
-     calculate object center based upon it's bounding box coordinates
-    :bb: image coordinates of bounding box are assumed to be first 4 entries of bb
-    :return: center of bounding box 
-    """     
-    ul = (bb[0], bb[1])
-    lr = (bb[2], bb[3])
-    center_coord = ( ul[0] + (lr[0] - ul[0])/2, ul[1] + (lr[1] - ul[1])/2)
-    return center_coord
-
-def plot_object_center(img, prediction, figsize = (10,10)):
-    plt.figure(figsize=figsize)
-    
-    
-    # plot bbox
-    plt.plot(prediction[0],prediction[1], 'x', c = 'y', markersize = '10')
-    plt.plot(prediction[2],prediction[3], 'x', c = 'y', markersize = '10')
-    
-    
-    # plot bbox center
-    center_coords = get_bb_center(prediction)
-    plt.plot(center_coords[0],center_coords[1], 'o', c = 'r', markersize = '10')
-
-    plt.imshow(img)
-    plt.show()
-
-# camera resolution in pixels
-HEIGHT_RES = 1080 # Image width in pixels
-WIDTH_RES = 1920 # Image height in pixels
-
-# center of image (in image coordinates)
-CAM_CENTER =  (WIDTH_RES/2, HEIGHT_RES/2)
-
-# field of view in degrees
-FOV_H = 62.8 # FOV in degrees
-FOV_W = 36.8 # FOV in degrees
-
-# camera tilt in degrees
-W = 7.4
-
-# camera altitude
-CAMERA_ALTITUDE = 5
-
-# calculate the focal lenght
-FL_H = (HEIGHT_RES/2)/(np.tan(np.deg2rad(FOV_H/2)))
-FL_W = (WIDTH_RES/2)/(np.tan(np.deg2rad(FOV_W/2)))
-
-# coordinates of the camera in real world
-CAMERA_COORDS = (0, 0)
-
-
-def get_object_pos(obj_img_coords, camera_altitude = CAMERA_ALTITUDE, 
-                   camera_tilt = W, cam_center = CAM_CENTER, fl_w = FL_H, fl_h= FL_W):
-    """
-     calculate object coordinates in the plane projected onto image
-    :obj_img_coords: image coordinates of object 
-    :camera_altitude: camera altitude in radial earth direction
-    :camera_tilt: camera tilt wrp to orthogonal plane to radial earth direction
-    :cam_center: camera center in pixel coordinates
-    :fl_w: width focal lenght
-    :fl_w: width focal lenght
-    :fl_h: heigth focal lenght
-    :return: relative coordinates to camera plane
-    """ 
-    
-    # calculate heigth object angle in degrees
-    theta_h = math.degrees(np.arctan((obj_img_coords[1] - cam_center[1])/fl_h))
-    
-    # account for tilt
-    theta_h_tilt = theta_h + camera_tilt
-
-    # calculate distance from car to camera
-    I = camera_altitude/np.tan(math.radians(theta_h_tilt))
-
-    # calculate heigth object angle
-    tan_theta_w = (obj_img_coords[0]-cam_center[0])/(2*fl_w) # correct this later...
-
-    # calculate distance of car to central axis 
-    J = tan_theta_w*I
-
-    return (I, J)
-    

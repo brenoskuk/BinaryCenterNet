@@ -274,4 +274,75 @@ def load_model(architecture_name):
         print("Problem loading model...")
     return model, prediction_model, debug_model
 
+#############################################################
+#
+#   Heatmap direct inference
+#
+#############################################################
+def hmap_direct_inference(image, debug_model, score_threshold = 0.1,
+                           output_name = 'heatmap_output',
+                    save_img = False, plot_img = False, figsize = (15,15), verbose = 0,
+                    classes = voc_classes, input_w = 512, input_h = 512):
+    """
+    Extract object detection heatmap predictions from a model.
 
+    :image: image file
+    :pred_model: model used for predicting bounding boxes
+    :colors: colors to use in plot
+    :score_threshold: minimum confidence to accept detection
+    :plot_img: set to True to plot image with matplotlib
+    :output_name: set output image name
+    :save_img: set to true to save image with detections to /output
+    :figsize: set size for plot if plot_img is True
+    :classes: dictionary with classes used by the detector
+    :input_w: input width
+    :input_h: input lehgth
+    :verbose: disable to silence function prints
+    
+    :return: array of heatmaps
+    """ 
+    
+    tgt_w=input_w
+    tgt_h=input_h
+    
+
+    classes_list = list(classes.keys())
+    
+    # create directory if it doesn't exist
+    if save_img:
+        if not os.path.isdir('output'):
+            os.mkdir('output')
+    
+    # copy image
+    src_image = image.copy()
+    
+    # get center and scale of the image
+    c = np.array([image.shape[1] / 2., image.shape[0] / 2.], dtype=np.float32)
+    s = max(image.shape[0], image.shape[1]) * 1.0
+
+    # preprocess image
+    image = preprocess_image(image, c, s, tgt_w=tgt_w, tgt_h=tgt_h)
+    inputs = np.expand_dims(image, axis=0)
+    
+    # run network
+    start = time.time()
+    heatmaps = heatmaps = debug_model.predict_on_batch(inputs)[0][0]
+    delta_t = time.time() - start
+    
+    if verbose > 0:
+        print('Inference time : ', delta_t)
+    
+    
+    # obtain detection transformation to original image size
+    trans = get_affine_transform(c, s, (tgt_w // 4, tgt_h // 4), inv=1)
+
+    
+    if plot_img:
+        plt.figure(figsize=figsize)
+        for idx in range(0,20):
+            plt.subplot(4, 5, idx+1)
+            plt.imshow(heatmaps[:,:,idx])
+            title = 'class: ' + classes_list[idx]
+            plt.title(title)
+        
+    return heatmaps
