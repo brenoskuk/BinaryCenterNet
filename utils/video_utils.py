@@ -119,8 +119,8 @@ def get_mp4_filepaths(folder_path, verbose = 0):
     list_mp4_names = []
     for idx, mp4_idx in enumerate(indexes_mp4):
         print('file idx:  {}\nfile name: {}\n'.format(idx, filenames[mp4_idx]))
-        list_mp4_files.append(os.path.join(folder_path, filenames[idx]))
-        list_mp4_names.append(filenames[idx])
+        list_mp4_files.append(os.path.join(folder_path, filenames[mp4_idx]))
+        list_mp4_names.append(filenames[mp4_idx])
 
     return list_mp4_files, list_mp4_names
 
