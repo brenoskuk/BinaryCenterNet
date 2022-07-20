@@ -1,7 +1,11 @@
 # Project folders
-model_log/
-saved_models/
-output/
+*model_log/*
+*model_logs/*
+*saved_models/*
+*saved_model/*
+*output/*
+*outputs/*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
