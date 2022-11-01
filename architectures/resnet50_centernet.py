@@ -15,7 +15,6 @@ import larq_zoo as lqz
 from urllib.request import urlopen
 from larq.layers import QuantConv2D as QuantConv2D
 from tensorflow import Tensor
-import larq
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)

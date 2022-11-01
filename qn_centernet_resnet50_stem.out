@@ -1,0 +1,203 @@
+2022-11-01 12:48:05.915018: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:07.753973: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  SSE4.1 SSE4.2 AVX AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2022-11-01 12:48:07.758245: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2022-11-01 12:48:07.817293: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0e:00.0 name: Tesla P100-PCIE-16GB computeCapability: 6.0
+coreClock: 1.3285GHz coreCount: 56 deviceMemorySize: 15.90GiB deviceMemoryBandwidth: 681.88GiB/s
+2022-11-01 12:48:07.817329: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:07.819369: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublas.so.10
+2022-11-01 12:48:07.819434: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublasLt.so.10
+2022-11-01 12:48:07.821315: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2022-11-01 12:48:07.821681: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2022-11-01 12:48:07.823831: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2022-11-01 12:48:07.824983: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusparse.so.10
+2022-11-01 12:48:07.829525: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudnn.so.7
+2022-11-01 12:48:07.832484: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1862] Adding visible gpu devices: 0
+2022-11-01 12:48:07.832541: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:08.546216: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2022-11-01 12:48:08.546295: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      0 
+2022-11-01 12:48:08.546315: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1280] 0:   N 
+2022-11-01 12:48:08.550697: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1406] Created TensorFlow device (/device:GPU:0 with 14605 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:0e:00.0, compute capability: 6.0)
+2022-11-01 12:48:08.551083: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2022-11-01 12:48:08.552691: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0e:00.0 name: Tesla P100-PCIE-16GB computeCapability: 6.0
+coreClock: 1.3285GHz coreCount: 56 deviceMemorySize: 15.90GiB deviceMemoryBandwidth: 681.88GiB/s
+2022-11-01 12:48:08.552722: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:08.552780: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublas.so.10
+2022-11-01 12:48:08.552815: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublasLt.so.10
+2022-11-01 12:48:08.552836: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2022-11-01 12:48:08.552855: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2022-11-01 12:48:08.552872: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2022-11-01 12:48:08.552912: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusparse.so.10
+2022-11-01 12:48:08.552934: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudnn.so.7
+2022-11-01 12:48:08.555860: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1862] Adding visible gpu devices: 0
+2022-11-01 12:48:08.555889: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2022-11-01 12:48:08.555916: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      0 
+2022-11-01 12:48:08.555922: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1280] 0:   N 
+2022-11-01 12:48:08.558764: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1406] Created TensorFlow device (/device:GPU:0 with 14605 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:0e:00.0, compute capability: 6.0)
+2022-11-01 12:48:08.558789: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2022-11-01 12:48:08.935240: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2022-11-01 12:48:08.937066: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0e:00.0 name: Tesla P100-PCIE-16GB computeCapability: 6.0
+coreClock: 1.3285GHz coreCount: 56 deviceMemorySize: 15.90GiB deviceMemoryBandwidth: 681.88GiB/s
+2022-11-01 12:48:08.937101: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:08.937158: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublas.so.10
+2022-11-01 12:48:08.937193: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublasLt.so.10
+2022-11-01 12:48:08.937231: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2022-11-01 12:48:08.937254: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2022-11-01 12:48:08.937276: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2022-11-01 12:48:08.937294: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusparse.so.10
+2022-11-01 12:48:08.937315: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudnn.so.7
+2022-11-01 12:48:08.940221: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1862] Adding visible gpu devices: 0
+2022-11-01 12:48:08.941985: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0e:00.0 name: Tesla P100-PCIE-16GB computeCapability: 6.0
+coreClock: 1.3285GHz coreCount: 56 deviceMemorySize: 15.90GiB deviceMemoryBandwidth: 681.88GiB/s
+2022-11-01 12:48:08.942014: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.10.1
+2022-11-01 12:48:08.942051: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublas.so.10
+2022-11-01 12:48:08.942070: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublasLt.so.10
+2022-11-01 12:48:08.942087: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2022-11-01 12:48:08.942104: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2022-11-01 12:48:08.942139: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2022-11-01 12:48:08.942175: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusparse.so.10
+2022-11-01 12:48:08.942193: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudnn.so.7
+2022-11-01 12:48:08.944996: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1862] Adding visible gpu devices: 0
+2022-11-01 12:48:08.945075: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2022-11-01 12:48:08.945086: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      0 
+2022-11-01 12:48:08.945094: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1280] 0:   N 
+2022-11-01 12:48:08.948020: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1406] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 14605 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:0e:00.0, compute capability: 6.0)
+2022-11-01 12:48:08.948051: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+WARNING:tensorflow:AutoGraph could not transform <bound method QuantizerBaseConv._get_padding_same of <larq.layers.QuantConv2D object at 0x7f35047921c0>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+{'architecture': 'qn_centernet_resnet50_stem', 'batch_size': 32, 'num_classes': 20, 'input_size': 512, 'gpu': '6', 'epochs': 200, 'train_verbose': 2, 'snapshots': True, 'epoch_evaluation': True, 'final_evaluation': True, 'data_augmentation': True, 'model_summary': True, 'dataset_path': '../../datasets/PascalVOC', 'compute_val_loss': True, 'val_sampling': 0.25, 'train_sampling': 0.05}
+Default GPU Device: /device:GPU:0
+WARNING:tensorflow:AutoGraph could not transform <function decode.<locals>.<lambda> at 0x7f35045c14c0> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+Copying layer weights from resnet50 to stem index = 0
+Copying layer weights from resnet50 to stem index = 1
+Copying layer weights from resnet50 to stem index = 2
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 3
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 4
+Copying layer weights from resnet50 to stem index = 5
+Copying layer weights from resnet50 to stem index = 6
+Copying layer weights from resnet50 to stem index = 7
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 8
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 9
+Copying layer weights from resnet50 to stem index = 10
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 11
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 12
+Copying layer weights from resnet50 to stem index = 13
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 14
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 15
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 16
+Something happened. Check.
+Copying layer weights from resnet50 to stem index = 17
+Copying layer weights from resnet50 to stem index = 18
++model stats-----------------------------------------------------------------------------------------------------+
+| Layer                   Input prec.              Outputs  # 1-bit  # 32-bit   Memory   1-bit MACs  32-bit MACs |
+|                               (bit)                           x 1       x 1     (kB)                           |
++----------------------------------------------------------------------------------------------------------------+
+| input_1                           -    (-1, 512, 512, 3)        0         0        0            ?            ? |
+| conv1_pad                         -    (-1, 518, 518, 3)        0         0        0            ?            ? |
+| conv1                             -   (-1, 256, 256, 64)        0      9472    37.00            0    616562688 |
+| bn_conv1                          -   (-1, 256, 256, 64)        0       128     0.50            0            0 |
+| activation                        -   (-1, 256, 256, 64)        0         0        0            ?            ? |
+| pool1_pad                         -   (-1, 258, 258, 64)        0         0        0            ?            ? |
+| max_pooling2d                     -   (-1, 128, 128, 64)        0         0        0            0            0 |
+| res2a_branch2a                    -   (-1, 128, 128, 64)        0      4160    16.25            0     67108864 |
+| bn2a_branch2a                     -   (-1, 128, 128, 64)        0       128     0.50            0            0 |
+| activation_1                      -   (-1, 128, 128, 64)        0         0        0            ?            ? |
+| res2a_branch2b                    -   (-1, 128, 128, 64)        0     36928   144.25            0    603979776 |
+| bn2a_branch2b                     -   (-1, 128, 128, 64)        0       128     0.50            0            0 |
+| activation_2                      -   (-1, 128, 128, 64)        0         0        0            ?            ? |
+| res2a_branch2c                    -  (-1, 128, 128, 256)        0     16640    65.00            0    268435456 |
+| res2a_branch1                     -  (-1, 128, 128, 256)        0     16640    65.00            0    268435456 |
+| bn2a_branch2c                     -  (-1, 128, 128, 256)        0       512     2.00            0            0 |
+| bn2a_branch1                      -  (-1, 128, 128, 256)        0       512     2.00            0            0 |
+| add                               -  (-1, 128, 128, 256)        0         0        0            ?            ? |
+| activation_3                      -  (-1, 128, 128, 256)        0         0        0            ?            ? |
+| quant_conv2d                      1  (-1, 128, 128, 256)   589824         0    72.00   9663676416            0 |
+| batch_normalization               -  (-1, 128, 128, 256)        0       512     2.00            0            0 |
+| add_1                             -  (-1, 128, 128, 256)        0         0        0            ?            ? |
+| quant_conv2d_1                    1  (-1, 128, 128, 256)   589824         0    72.00   9663676416            0 |
+| batch_normalization_1             -  (-1, 128, 128, 256)        0       512     2.00            0            0 |
+| add_2                             -  (-1, 128, 128, 256)        0         0        0            ?            ? |
+| activation_4                      -  (-1, 128, 128, 256)        0         0        0            ?            ? |
+| max_pooling2d_1                   -  (-1, 127, 127, 256)        0         0        0            0            0 |
+| depthwise_conv2d                  -    (-1, 64, 64, 256)        0      2304     9.00            0      9437184 |
+| quant_conv2d_2                    -    (-1, 64, 64, 128)        0     32768   128.00            0    134217728 |
+| batch_normalization_2             -    (-1, 64, 64, 128)        0       256     1.00            0            0 |
+| quant_conv2d_3                    1    (-1, 64, 64, 128)   147456         0    18.00    603979776            0 |
+| batch_normalization_3             -    (-1, 64, 64, 128)        0       256     1.00            0            0 |
+| add_3                             -    (-1, 64, 64, 128)        0         0        0            ?            ? |
+| quant_conv2d_4                    1    (-1, 64, 64, 128)   147456         0    18.00    603979776            0 |
+| batch_normalization_4             -    (-1, 64, 64, 128)        0       256     1.00            0            0 |
+| add_4                             -    (-1, 64, 64, 128)        0         0        0            ?            ? |
+| activation_5                      -    (-1, 64, 64, 128)        0         0        0            ?            ? |
+| max_pooling2d_2                   -    (-1, 63, 63, 128)        0         0        0            0            0 |
+| depthwise_conv2d_1                -    (-1, 32, 32, 128)        0      1152     4.50            0      1179648 |
+| quant_conv2d_5                    -    (-1, 32, 32, 128)        0     16384    64.00            0     16777216 |
+| batch_normalization_5             -    (-1, 32, 32, 128)        0       256     1.00            0            0 |
+| quant_conv2d_6                    1    (-1, 32, 32, 128)   147456         0    18.00    150994944            0 |
+| batch_normalization_6             -    (-1, 32, 32, 128)        0       256     1.00            0            0 |
+| add_5                             -    (-1, 32, 32, 128)        0         0        0            ?            ? |
+| quant_conv2d_7                    1    (-1, 32, 32, 128)   147456         0    18.00    150994944            0 |
+| batch_normalization_7             -    (-1, 32, 32, 128)        0       256     1.00            0            0 |
+| add_6                             -    (-1, 32, 32, 128)        0         0        0            ?            ? |
+| activation_6                      -    (-1, 32, 32, 128)        0         0        0            ?            ? |
+| max_pooling2d_3                   -    (-1, 31, 31, 128)        0         0        0            0            0 |
+| depthwise_conv2d_2                -    (-1, 16, 16, 128)        0      1152     4.50            0       294912 |
+| quant_conv2d_8                    -     (-1, 16, 16, 64)        0      8192    32.00            0      2097152 |
+| batch_normalization_8             -     (-1, 16, 16, 64)        0       128     0.50            0            0 |
+| quant_conv2d_9                    1     (-1, 16, 16, 64)    36864         0     4.50      9437184            0 |
+| batch_normalization_9             -     (-1, 16, 16, 64)        0       128     0.50            0            0 |
+| add_7                             -     (-1, 16, 16, 64)        0         0        0            ?            ? |
+| quant_conv2d_10                   1     (-1, 16, 16, 64)    36864         0     4.50      9437184            0 |
+| batch_normalization_10            -     (-1, 16, 16, 64)        0       128     0.50            0            0 |
+| add_8                             -     (-1, 16, 16, 64)        0         0        0            ?            ? |
+| conv2d_transpose                  -     (-1, 32, 32, 64)        0     65536   256.00            0     67108864 |
+| batch_normalization_11            -     (-1, 32, 32, 64)        0       128     0.50            0            0 |
+| re_lu                             -     (-1, 32, 32, 64)        0         0        0            ?            ? |
+| conv2d_transpose_1                -     (-1, 64, 64, 32)        0     32768   128.00            0    134217728 |
+| batch_normalization_12            -     (-1, 64, 64, 32)        0        64     0.25            0            0 |
+| re_lu_1                           -     (-1, 64, 64, 32)        0         0        0            ?            ? |
+| conv2d_transpose_2                -   (-1, 128, 128, 32)        0     16384    64.00            0    268435456 |
+| batch_normalization_13            -   (-1, 128, 128, 32)        0        64     0.25            0            0 |
+| re_lu_2                           -   (-1, 128, 128, 32)        0         0        0            ?            ? |
+| conv2d                            -   (-1, 128, 128, 64)        0     18432    72.00            0    301989888 |
+| conv2d_2                          -   (-1, 128, 128, 64)        0     18432    72.00            0    301989888 |
+| conv2d_4                          -   (-1, 128, 128, 64)        0     18432    72.00            0    301989888 |
+| batch_normalization_14            -   (-1, 128, 128, 64)        0       128     0.50            0            0 |
+| batch_normalization_15            -   (-1, 128, 128, 64)        0       128     0.50            0            0 |
+| batch_normalization_16            -   (-1, 128, 128, 64)        0       128     0.50            0            0 |
+| re_lu_3                           -   (-1, 128, 128, 64)        0         0        0            ?            ? |
+| re_lu_4                           -   (-1, 128, 128, 64)        0         0        0            ?            ? |
+| re_lu_5                           -   (-1, 128, 128, 64)        0         0        0            ?            ? |
+| conv2d_1                          -   (-1, 128, 128, 20)        0      1300     5.08            0     20971520 |
+| conv2d_3                          -    (-1, 128, 128, 2)        0       130     0.51            0      2097152 |
+| conv2d_5                          -    (-1, 128, 128, 2)        0       130     0.51            0      2097152 |
+| input_2                           -   (-1, 128, 128, 20)        0         0        0            ?            ? |
+| input_3                           -         (-1, 100, 2)        0         0        0            ?            ? |
+| input_4                           -         (-1, 100, 2)        0         0        0            ?            ? |
+| input_5                           -            (-1, 100)        0         0        0            ?            ? |
+| input_6                           -            (-1, 100)        0         0        0            ?            ? |
+| centernet_loss                    -             multiple        0         0        0            ?            ? |
++----------------------------------------------------------------------------------------------------------------+
+| Total                                                     1843200    322328  1484.09  20856176640   3389423616 |
++----------------------------------------------------------------------------------------------------------------+2022-11-01 12:49:27.351580: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2022-11-01 12:49:27.353733: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2199815000 Hz
+2022-11-01 12:49:31.903891: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudnn.so.7
+2022-11-01 12:49:33.145920: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcublas.so.10

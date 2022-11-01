@@ -29,7 +29,7 @@ import pyximport
 pyximport.install(reload_support=True)
 from utils.evaluate import *
 
-    
+   
 
 def check_args(parsed_args):
     """
@@ -78,6 +78,8 @@ def parse_args(args):
    
     parser.add_argument('--epochs', help='Number of epochs to train.', type=int, default=200)
    
+    parser.add_argument('--train-verbose', help='Tensorflow .fit verbose: 0 = silent, 1 = progress bar, 2 = only epochs.', default=2, type=int)
+
     parser.add_argument('--no-snapshots', help='Disable saving snapshots.', dest='snapshots', action='store_false')
    
     parser.add_argument('--epoch-evaluation', help='Disable per epoch evaluation.', dest='epoch_evaluation',
@@ -136,6 +138,33 @@ def main(args=None):
     # (the centernet input must be specified by the architecture file)
     model, prediction_model, debug_model = architecture_module.centernet(input_size = input_size, num_classes = num_classes)
     
+    # get resnet stem weights if architecture is correct
+    if architecture_name == 'qn_centernet_resnet50_stem':
+        def copy_resnet_weights(resnet50, centernet, verbose = False):
+            n_layers_stem = 19
+            for layer_id in range(n_layers_stem): 
+                #print(layer.get_config(), layer.get_weights())
+                if verbose:
+                    print('Copying layer weights from resnet50 to stem index = {}'.format(layer_id))
+                w_copy = resnet50.layers[layer_id].get_weights()
+                centernet.layers[layer_id].set_weights(w_copy)
+                centernet.layers[layer_id].trainable = False  # Freeze the layer
+                if verbose:
+                    try:
+                        if tf.math.equal(centernet.layers[layer_id].get_weights(), resnet50.layers[layer_id].get_weights()):
+                            print('Success...')
+                    except:
+                        print('Something happened. Check.')
+        input_size=(512,512)
+        image_input = tensorflow.keras.layers.Input(shape=(input_size[0], input_size[1], 3))
+        resnet50 = tf.keras.applications.resnet50.ResNet50(
+            include_top=False,
+            weights='imagenet',
+            input_tensor=image_input,
+            input_shape=None,
+            pooling=None,
+            )
+        copy_resnet_weights(resnet50, model, verbose = True)
     if args.model_summary:
         lq.models.summary(model)
     
@@ -225,7 +254,7 @@ def main(args=None):
     history = model.fit(
             train_generator,
             epochs=args.epochs,
-            verbose=2,
+            verbose=args.train_verbose,
             callbacks=callbacks
         )
        

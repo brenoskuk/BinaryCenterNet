@@ -2,7 +2,7 @@
 
 Binary neural networks, Object detection using center point detection:
 
-> [**Efficient Object Detection Using Binary Neural Networks**](http://arxiv.org/abs/1904.07850),            
+> [**Efficient Object Detection Using Binary Neural Networks**](http://arxiv.org/),            
 > Breno Skuk, Dimitris Milioris, Joachim Wabnig         
 > *technical report ([None](None))*  
 
@@ -64,7 +64,7 @@ To train using an architecture from the architectures folder:
 python train.py --architecture <<architecture name>>
 ~~~
 
-### Training hyperparameters
+### Training hyperparameters and args
 
 Here is a list of the arguments that can be given to train.py:
 
@@ -98,6 +98,7 @@ Here is a list of the arguments that can be given to train.py:
 
     --train-sampling : Set the fraction relative to all data to be sampled at each epoch when calculating the train mAP during training (1 uses all train set). default=0.05
 
+    --train-verbose: Tensorflow .fit verbose: 0 = silent, 1 = progress bar, 2 = only epochs. default=2
 
 ## Inference with BinaryCenterNet models
 

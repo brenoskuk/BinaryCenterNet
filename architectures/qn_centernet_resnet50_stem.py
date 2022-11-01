@@ -23,9 +23,6 @@ from utils.loss import *
 from utils.model_tools import *
 from utils.architecture import *
 
-
-
-
 # All quantized layers will use the same binary options
 kwargs = dict(input_quantizer="ste_sign",
               kernel_quantizer="ste_sign",
@@ -56,41 +53,80 @@ def blurpool_initializer(shape, dtype=None):
     return np.reshape(k, shape)
 
 
-def stem_module(filters, x):
-    """Start of network."""
-    assert filters % 4 == 0
+# check architecture repo: 
+# https://github.com/keras-team/keras-applications/blob/master/keras_applications/resnet50.py 
+def resnet50_conv_block(input_tensor,
+               kernel_size,
+               filters,
+               stage,
+               block,
+               strides=(2, 2)):
+    """A block that has a conv layer at shortcut.
+    # Arguments
+        input_tensor: input tensor
+        kernel_size: default 3, the kernel size of
+            middle conv layer at main path
+        filters: list of integers, the filters of 3 conv layer at main path
+        stage: integer, current stage label, used for generating layer names
+        block: 'a','b'..., current block label, used for generating layer names
+        strides: Strides for the first conv layer in the block.
+    # Returns
+        Output tensor for the block.
+    Note that from stage 3,
+    the first conv layer at main path is with strides=(2, 2)
+    And the shortcut should have strides=(2, 2) as well
+    """
+    filters1, filters2, filters3 = filters
 
-    x = lq.layers.QuantConv2D(
-        filters // 4,
-        (3, 3),
-        kernel_initializer="he_normal",
-        padding="same",
-        strides=2,
-        use_bias=False,
-    )(x)
-    
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Activation("relu")(x)
+    conv_name_base = 'res' + str(stage) + block + '_branch'
+    bn_name_base = 'bn' + str(stage) + block + '_branch'
 
-    x = lq.layers.QuantDepthwiseConv2D(
-        (3, 3),
-        padding="same",
-        strides=2,
-        use_bias=False,
-    )(x)
-    
-    x = tf.keras.layers.BatchNormalization(scale=False, center=False)(x)
+    x = tf.keras.layers.Conv2D(filters1, (1, 1), strides=strides,
+                      kernel_initializer='he_normal',
+                      name=conv_name_base + '2a')(input_tensor)
+    x = tf.keras.layers.BatchNormalization(name=bn_name_base + '2a')(x)
+    x = tf.keras.layers.Activation('relu')(x)
 
-    x = lq.layers.QuantConv2D(
-        filters,
-        1,
-        kernel_initializer="he_normal",
-        use_bias=False,
-    )(x)
-    
-    x = tf.keras.layers.BatchNormalization()(x)
-    
+    x = tf.keras.layers.Conv2D(filters2, kernel_size, padding='same',
+                      kernel_initializer='he_normal',
+                      name=conv_name_base + '2b')(x)
+    x = tf.keras.layers.BatchNormalization(name=bn_name_base + '2b')(x)
+    x = tf.keras.layers.Activation('relu')(x)
+
+    x = tf.keras.layers.Conv2D(filters3, (1, 1),
+                      kernel_initializer='he_normal',
+                      name=conv_name_base + '2c')(x)
+    x = tf.keras.layers.BatchNormalization(name=bn_name_base + '2c')(x)
+
+    shortcut = tf.keras.layers.Conv2D(filters3, (1, 1), strides=strides,
+                             kernel_initializer='he_normal',
+                             name=conv_name_base + '1')(input_tensor)
+    shortcut = tf.keras.layers.BatchNormalization(name=bn_name_base + '1')(shortcut)
+
+    x = tf.keras.layers.add([x, shortcut])
+    x = tf.keras.layers.Activation('relu')(x)
     return x
+    
+# check architecture repo: 
+# https://github.com/keras-team/keras-applications/blob/master/keras_applications/resnet50.py 
+def stem_module_resnet50(x, filters = 256):
+    """Start of network."""
+    
+    assert filters == 256 # must be equal to resnet50
+    
+    x = tf.keras.layers.ZeroPadding2D(padding=(3, 3), name='conv1_pad')(x)
+    x = tf.keras.layers.Conv2D(64, (7, 7),
+                      strides=(2, 2),
+                      padding='valid',
+                      kernel_initializer='he_normal',
+                      name='conv1')(x)
+    x = tf.keras.layers.BatchNormalization(name='bn_conv1')(x)
+    x = tf.keras.layers.Activation('relu')(x)
+    x = tf.keras.layers.ZeroPadding2D(padding=(1, 1), name='pool1_pad')(x)
+    x = tf.keras.layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
+    x = resnet50_conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
+    return x
+
 
 def residual_block(x):
     """Standard residual block, without strides or filter changes."""
@@ -142,8 +178,8 @@ def centernet(num_classes, input_size=(512,512), max_objects=100, score_threshol
               nms=True,
               flip_test=False,
               stem_filters = None,
-              encoder_section_filters=[128, 256, 324, 512], encoder_section_blocks=[2, 4, 8, 10],
-              decoder_section_filters=[128, 64, 16], decoder_section_blocks=[1, 1, 1],
+              encoder_section_filters=[256, 128, 128, 64], encoder_section_blocks=[2, 2, 2, 2],
+              decoder_section_filters=[64, 32, 32], decoder_section_blocks=[1, 1, 1],
               heads_fm_dim = 64,
               tp_conv_ker_size = (4,4)
 ):
@@ -161,7 +197,7 @@ def centernet(num_classes, input_size=(512,512), max_objects=100, score_threshol
     if stem_filters is None:
         stem_filters = encoder_section_filters[0]
     
-    x = stem_module(stem_filters, image_input)
+    x = stem_module_resnet50(image_input, stem_filters)
 
     for layer_depth, (layers, filters) in enumerate(zip(encoder_section_blocks, encoder_section_filters)):
         for layer in range(layers):
