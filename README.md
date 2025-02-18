@@ -149,9 +149,10 @@ If you find this project useful for your research, please use the following BibT
 @techreport{skuk2022bnn,
   title={Efficient Object Detection Using Binary Neural Networks},
   author={Skuk, Breno and Milioris, Dimitris and Wabnig, Joachim},
-  institution={Nokia Bell Labs},  % or your affiliation
+  institution={Nokia Bell Labs},
   year={2022},
-  number={Technical Report},  % Optional
-  url={https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf}
+  number={Technical Report},
+  note={Available at \url{https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf}}
 }
+
 
