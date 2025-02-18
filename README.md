@@ -4,7 +4,8 @@ Binary neural networks, Object detection using center point detection:
 
 > **Efficient Object Detection Using Binary Neural Networks**,            
 > Breno Skuk, Dimitris Milioris, Joachim Wabnig         
-> *  ([Technical Report](https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf))
+> * ([technical report](https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf)) *
+
  
 
  
