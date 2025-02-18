@@ -2,9 +2,10 @@
 
 Binary neural networks, Object detection using center point detection:
 
-> [**Efficient Object Detection Using Binary Neural Networks**](http://arxiv.org/),            
+> **Efficient Object Detection Using Binary Neural Networks**,            
 > Breno Skuk, Dimitris Milioris, Joachim Wabnig         
-> *technical report ([None](None))*  
+> * ([technical report](https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf))
+*  
 
  
 
@@ -137,16 +138,19 @@ We also make use of the QuickNet architecture.
 
 
 ## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-X
 
 ## Citation
 
 If you find this project useful for your research, please use the following BibTeX entry.
 
-    @inproceedings{XXX,
-      title={Efficient Object Detection using Binary Networks},
-      author={Skuk, Breno and Milioris, Dimitris and Wabnig, Joachim},
-      booktitle={XX},
-      year={2022}
-    }
+@techreport{skuk2022bnn,
+  title={Efficient Object Detection Using Binary Neural Networks},
+  author={Skuk, Breno and Milioris, Dimitris and Wabnig, Joachim},
+  institution={Nokia Bell Labs},  % or your affiliation
+  year={2022},
+  number={Technical Report},  % Optional
+  url={https://github.com/brenoskuk/BinaryCenterNet/blob/main/Technical_Object_Detection_BNN.pdf}
+}
+
